@@ -1,6 +1,14 @@
 import requests
 import datetime
 
+# LSP IDs
+# 27 ESA
+# 44 NASA
+# 121 SpaceX
+# 124 ULA
+# 147 Rocket Lab
+# 265 Firefly
+
 class Launch:
     api = "https://lldev.thespacedevs.com/2.3.0/launches/upcoming/"
     lsp = "" # Launch service provider
@@ -14,7 +22,7 @@ class Launch:
         pass
 
     def updateLaunch(self):
-        response = requests.get(self.api, params = {"limit": 4})
+        response = requests.get(self.api, params = {"limit": 1, "hide_recent_previous": True, "lsp__ids": "27,44,121,124,147,265"})
         if response.status_code == 200:
             data = response.json()
             for launch in data.get("results", []):
