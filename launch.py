@@ -1,14 +1,6 @@
 import requests
 import datetime
 
-# LSP IDs
-# 27 ESA
-# 44 NASA
-# 121 SpaceX
-# 124 ULA
-# 147 Rocket Lab
-# 265 Firefly
-
 class Launch:
     api = "https://lldev.thespacedevs.com/2.3.0/launches/upcoming/"
     lsp = "" # Launch service provider
@@ -21,17 +13,23 @@ class Launch:
     def __init__(self):
         pass
 
-    def updateLaunch(self):
-        response = requests.get(self.api, params = {"limit": 1, "hide_recent_previous": True, "lsp__ids": "27,44,121,124,147,265"})
-        if response.status_code == 200:
-            data = response.json()
-            for launch in data.get("results", []):
-                title = launch.get("name").split(" | ")
-                self.vehicle = title[0]
-                self.mission = title[1]
-                self.pad = (launch.get("pad", {})).get("name")
-                self.lsp = (launch.get("launch_service_provider", {})).get("name")
-                self.launchDate = datetime.datetime.fromisoformat(launch.get("window_start"))
-                self.deltaTime = self.launchDate - datetime.datetime.now(datetime.timezone.utc)
-        else:
-            print(f"Failed to retrieve data. Status code: {response.status_code}")
+    def updateLaunch(self, list):
+        try:
+            response = requests.get(self.api, params = {"limit": 20, "hide_recent_previous": True})
+            if response.status_code == 200:
+                data = response.json()
+                for launch in data.get("results", []):
+                    title = launch.get("name").split(" | ")
+                    self.vehicle = title[0]
+                    self.mission = title[1]
+                    self.pad = (launch.get("pad", {})).get("name")
+                    self.lsp = (launch.get("launch_service_provider", {})).get("name")
+                    self.launchDate = datetime.datetime.fromisoformat(launch.get("window_start"))
+                    self.deltaTime = self.launchDate - datetime.datetime.now(datetime.timezone.utc)
+                    if self.vehicle in list:
+                        break
+                return 0
+            else:
+                return 1
+        except:
+            return 2
