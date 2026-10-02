@@ -3,7 +3,7 @@ from PIL import ImageFont, Image, ImageDraw
 
 class PaperScreen:
     display = auto()
-    timerFont = ImageFont.truetype("fonts/7segment.ttf", 100)
+    timerFont = ImageFont.truetype("/home/ofhserver/spaceart/spaceart/fonts/7segment.ttf", 100)
     infoFont = ImageFont.load_default(20)
 
     clockLocDict = {
@@ -46,6 +46,12 @@ class PaperScreen:
         draw.text(tuple(x + y for x, y in zip(self.infoLocDict.get(vehicle), (0, 25))), vehicle, font = self.infoFont, fill = "white")
         draw.text(tuple(x + y for x, y in zip(self.infoLocDict.get(vehicle), (0, 50))), mission, font = self.infoFont, fill = "white")
         draw.text(tuple(x + y for x, y in zip(self.infoLocDict.get(vehicle), (0, 75))), pad, font = self.infoFont, fill = "white")
+        img = img.transpose(Image.Transpose.ROTATE_270)
+        self.display.set_image(img, saturation = 0.5)
+        self.display.show()
+
+    def displayImage(self, image):
+        img = Image.open(image)
         img = img.transpose(Image.Transpose.ROTATE_270)
         self.display.set_image(img, saturation = 0.5)
         self.display.show()

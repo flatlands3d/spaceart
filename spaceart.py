@@ -1,26 +1,56 @@
-# Space Art v0.2
+# Space Art v1.0
 # Flatlands3D - Ethan Doerksen
-# 08/22/26
+# 10/02/26
 
 from launch import Launch
 from paper import PaperScreen
+from gpiozero import Button
 import time
+import threading
+import webserver
+import subprocess
+import networking
 
 imageDict = { # This dictionary links the launch library vehicle name to a background image
-    "Ariane 62" : "images/a62.jpg",
-    "Electron" : "images/electron.jpg",
-    "Falcon 9 Block 5" : "images/f9.jpg",
-    "Falcon Heavy" : "images/fh.jpg",
-    "Firefly Alpha Block 2" : "images/alpha2.jpg",
-    "Starship" : "images/ss.jpg",
-    "Vulcan VC6L" : "images/vc6l.jpg"
+    "Ariane 62" : "/home/ofhserver/spaceart/spaceart/images/a62.jpg",
+    "Electron" : "/home/ofhserver/spaceart/spaceart/images/electron.jpg",
+    "Falcon 9 Block 5" : "/home/ofhserver/spaceart/spaceart/images/f9.jpg",
+    "Falcon Heavy" : "/home/ofhserver/spaceart/spaceart/images/fh.jpg",
+    "Firefly Alpha Block 2" : "/home/ofhserver/spaceart/spaceart/images/alpha2.jpg",
+    "Starship" : "/home/ofhserver/spaceart/spaceart/images/ss.jpg",
+    "Vulcan VC6L" : "/home/ofhserver/spaceart/spaceart/images/vc6l.jpg",
+    "No Connection" : "/home/ofhserver/spaceart/spaceart/images/wifi.jpg"
 }
+
+buttonA = Button(5)
+buttonB = Button(6)
+buttonC = Button(25)
+buttonD = Button(24)
+
+buttonD.when_activated = networking.changeNetwork
 
 l1 = Launch()
 p1 = PaperScreen()
+webserverThread = threading.Thread(target = webserver.app.run, args = ("0.0.0.0", 80))
 
 if __name__ == "__main__":
+    print("Welcome to Space Art v1.0 by Flatlands3D")
     p1.initializeScreen()
+    if not networking.testConnection():
+        print("No Wi-fi Connection.")
+        p1.displayImage(imageDict.get("No Connection"))
+        networking.startHotspot()
+        time.sleep(2)
+        webserverThread.start()
+        while True:
+            if networking.testConnection():
+                break
+            time.sleep(5)
+    print("Connection Successful!")
+    print("Checking for Updates...")
+    subprocess.run("sudo apt update", shell = True, check = True)
+    subprocess.run("sudo apt upgrade -y", shell = True, check = True)
+    print("Done!")
     while True:
         status = l1.updateLaunch(imageDict)
         if status == 0:
